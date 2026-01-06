@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 
 class Task:
@@ -7,28 +8,18 @@ class Task:
     def __init__(
         self,
         title: str,
-        description: str = "",
         priority: int = 1,
-        due_date: datetime = None,
+        due_date: Optional[datetime] = None,
     ) -> None:
-        """_summary_
-
-        Args:
-            title (str): Task title (required, not-empty)
-            description (str, optional): Optional description "".
-            priority (int, optional): Priority 1-5 (default 1).
-
-        Raises:
-            ValueError: If title is empty or priority invalid
-        """
-
         # Validation
         # ---- Title ----
         if not title or not title.strip():
             raise ValueError("Task title can't be empty")
 
         # ---- priority ----
-        if not isinstance(priority, int) or not 1 <= priority <= 5:
+        if not isinstance(priority, int):
+            raise ValueError(f"Priority must be an Integer, got {type(priority)}")
+        if not (1 <= priority <= 5):
             raise ValueError(f"Priority must be 1-5, got {priority}")
 
         # ---- Due Date ----
@@ -40,7 +31,6 @@ class Task:
 
         # Instance properties
         self.title = title
-        self.description = description
         self.priority = priority
         self.completed = False
         self.completed_at = None
@@ -55,10 +45,19 @@ class Task:
         self.completed_at = datetime.now()
 
     def is_overdue(self):
-        if self.due_date is None or not self.completed:
+        if self.due_date is None or self.completed:
             return False
-
         return datetime.now() > self.due_date
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "priority": self.priority,
+            "completed": self.completed,
+            "completed_at": self.completed_at,
+            "due_date": self.due_date,
+        }
 
     # Magic Methods
     def __repr__(self) -> str:
@@ -68,15 +67,21 @@ class Task:
         status = "[✓]" if self.completed else "[○]"
         return f"{status} {self.title} (priority: {self.priority})"
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(self, other):
+            return NotImplementedError
+        return self.id == other.id
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
     # Class methods
     @classmethod
     def reset_counter(cls):
         cls._id_counter = 1
 
-
-task1 = Task(title="Go to gym", priority=1, due_date="2026, 01, 1")
-# task1 = Task(title="Go to gym", priority=1)
-print(task1.is_overdue())
-task1.complete()
-print(task1.is_overdue())
-# print(task1.completed)
+    @classmethod
+    def from_dict(cls, data):
+        task = cls(title=data["title"], priority=data["priority"])
+        task.id = data["id"]
+        return task

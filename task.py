@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 class Task:
     def __init__(self, title: str, description: str = "", priority: int = 1) -> None:
         """_summary_
@@ -25,3 +28,8 @@ class Task:
         self.description = description
         self.priority = priority
         self.completed = False
+        self.completed_at = None
+
+    def complete(self):
+        self.completed = True
+        self.completed_at = datetime.now()

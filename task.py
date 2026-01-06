@@ -33,3 +33,17 @@ class Task:
     def complete(self):
         self.completed = True
         self.completed_at = datetime.now()
+
+    # Magic Methods
+    def __repr__(self) -> str:
+        return f"Task(title={self.title}, priority={self.priority})"
+
+    def __str__(self) -> str:
+        status = "[✓]" if self.completed else "[○]"
+        return f"{status} {self.title} (priority: {self.priority})"
+
+
+task1 = Task(title="Gym", priority=1)
+print(task1)
+task1.complete()
+print(task1)
